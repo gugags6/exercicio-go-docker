@@ -1,0 +1,54 @@
+version: '3'
+
+services:
+
+  nginx:
+      build: 
+        context: ./nginx
+        dockerfile: Dockerfile.prod
+      image: gugags6/nginx
+      container_name: nginx
+      networks:
+        - net
+      ports:
+        - "8080:80"
+      depends_on:
+        - node
+
+  node:
+    build: 
+      context: ./node_app
+      dockerfile: Dockerfile
+    image: gugags6/node
+    container_name: node
+    entrypoint: dockerize -wait tcp://db:3306 -timeout 30s node index.js
+    volumes:
+      - ./src:/app/src
+    depends_on:
+      - database
+    networks:
+      - net
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+
+  
+  db:
+    build:
+      context: ./mysqldocker
+      dockerfile: Dockerfile
+    restart: always
+    tty: true
+    command: --innodb-use-native-aio=0
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=nodedb
+    networks:
+      - net
+    volumes:
+      - ./mysql:/var/lib/mysql
+
+networks:
+  net:
+    driver: bridge
