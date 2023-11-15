@@ -24,8 +24,6 @@ services:
     entrypoint: dockerize -wait tcp://db:3306 -timeout 30s node index.js
     volumes:
       - ./src:/app/src
-    depends_on:
-      - database
     networks:
       - net
     ports:
