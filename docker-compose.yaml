@@ -1,0 +1,11 @@
+version: '3'
+
+services:
+  fullcycle: 
+    build: 
+      context: go 
+    image: gugags6/fullcycle:latest 
+    container_name: fullcycle 
+    volumes:
+      - ./gofiles:/app
+    tty: true
