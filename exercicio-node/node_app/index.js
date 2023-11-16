@@ -9,16 +9,44 @@ const config = {
 }
 const mysql = require('mysql');
 
-app.get('/', async (req, res) => {
-  const connection = mysql.createConnection(config)
-  //const sqlTable = `CREATE TABLE IF NOT EXISTS people(id int NOT NULL AUTO_INCREMENT, name varchar(255) NOT NULL, PRIMARY KEY(id))`;
- // connection.query(sqlTable)
-  const sql = `INSERT INTO people(name) values('Yan')`;
-  connection.query(sql)
-  connection.query('SELECT * FROM people', (err, response) => {
-    res.send(`<h1>Full Cycle Rocks</h1> <br> <h2>${response.map(user => `${user.name}`)}</h2>`)});
-  
+
+
+const inserirNome = async (nome) => {
+    const connection = mysql.createConnection(config)
+    const sql = `INSERT INTO people(name) values('${nome}')`
+    connection.query(sql)
     connection.end()
+}
+
+const consultarNomes = async (res) => {
+    let page = '<h1>Full Cycle Rocks!</h1>'
+    const connection = mysql.createConnection(config)
+    const sql = `SELECT * FROM name`
+    connection.query(
+        sql,
+        (error, results, fields) => {
+            if (error) {
+                console.log(error);
+                mysql.end();
+                res.send(`<h1>${error}</h1>`);
+            }
+            if (results.length > 0) {
+                console.log(results);
+                results.forEach(element => {
+                    page += `\n<h1>nome: ${element['nome']}</h1>`
+                });
+                res.send(page)
+            } else {
+                res.send(page)
+            }
+        }
+    )
+    connection.end()
+}
+
+app.get('/', async (req, res) => {
+    await inserirNome('Gustav')
+    await consultarNomes(res)
 })
 
 app.listen(port, () => {
